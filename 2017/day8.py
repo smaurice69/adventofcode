@@ -12,13 +12,14 @@ from utils.file_parsers import read_lines
 
 def main():
 
-    lines = read_lines(Path(__file__).resolve().parent / 'input/day8test.txt')
+    lines = read_lines(Path(__file__).resolve().parent / 'input/day8.txt')
     registers = {}
+    global_max = 0
 
     for line in lines:
         vector = list(line.split())
         # set register
-        print(vector[0])
+     #   print(vector[0])
         registers[vector[0]] = 0
 
         # vector[0] = register
@@ -35,28 +36,43 @@ def main():
         reg_to_change = vector[0]
         reg_to_compare = vector[4]
         a = vector[5]
+        condition = False
+        the_val = int(registers[vector[4]])
+        the_comp = int(vector[6])
         if a == "==":
-            print("inside a ==")
-            if reg_to_compare == vector[6]:
-                if vector[1] == "dec":
-                    print("inside a dec")
-                    registers[reg_to_change] -= vector[2]
-                elif vector[1] == "inc":
-                    print("inside a inc")
-                    registers[reg_to_change] += vector[2]
+            if the_val == the_comp:
+                condition = True
+        elif a == ">":
+            if the_val   > the_comp:
+                condition = True
+        elif a == "<":
+            if the_val < the_comp:
+                condition = True
+        elif a == "<=":
+            if the_val <= the_comp:
+                condition = True
+        elif a == ">=":
+            if the_val >= the_comp:
+                condition = True
+        elif a == "!=":
+            if the_val != the_comp:
+                condition = True
+        else:
+            print("unknown operator")
+            break
+        if condition == True:
+            if(vector[1] == "inc"):
+                registers[reg_to_change] += int(vector[2])
+            else:
+                registers[reg_to_change] -= int(vector[2])
+        if(max(registers.values()) > global_max):
+            global_max = max(registers.values())
 
 
+    print ("Day 8 a = ", max(registers.values()))
+    print("Day 8 b = ", global_max)
 
-        if vector[3] != "if":
-            print("Error if")
-        if vector[1] != "dec" and vector[1] != "inc":
-            print("Error dec/inc")
-
-
-
-    print ("Day 2 a = ", 0)
-
-    print(registers)
+    # print(registers)
 
     lines = read_lines(Path(__file__).resolve().parent / 'input/day2.txt')
 
