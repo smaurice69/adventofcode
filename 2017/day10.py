@@ -34,17 +34,43 @@ def main():
 
     while skip_size < len(lengths):
         cur_length = lengths[skip_size]
-       # print("current length:", cur_length)
         old_nums = numbers.copy()
         numbers = reverse_circular(numbers, current_position, cur_length)
-       # print("Old numbers:", old_nums, "New numbers:", numbers)
         current_position = (current_position + cur_length + skip_size) % len(numbers)  # <-- fix
         skip_size += 1
-       # print("current length =", cur_length, ", current position =", current_position, ", skip_size =", skip_size)
-       # print(numbers)
 
     print("Day 10 a =", numbers[0]*numbers[1])  # total group score
 
+
+    lines[0] = "1,2,3"
+
+    ascii_lengths = []
+    for a in lines[0]:
+        ascii_lengths.append(ord(a))
+
+    ascii_lengths.append(17)
+    ascii_lengths.append(31)
+    ascii_lengths.append(73)
+    ascii_lengths.append(47)
+    ascii_lengths.append(23)
+
+    current_position = 0
+    skip_size = 0
+
+    print(ascii_lengths)
+
+    for i in range(0, 64):  #iterate 64 rounds
+        while skip_size < len(ascii_lengths):
+            cur_length = ascii_lengths[skip_size]
+            old_nums = numbers.copy()
+            numbers = reverse_circular(numbers, current_position, cur_length)
+            current_position = (current_position + cur_length + skip_size) % len(numbers)  # <-- fix
+            skip_size += 1
+
+
+
+
+    print(ascii_lengths)
 
 if __name__ == "__main__":
     main()
