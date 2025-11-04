@@ -1,5 +1,5 @@
 """Day 10 solution."""
-
+import numbers
 from pathlib import Path
 import sys
 import re
@@ -41,36 +41,35 @@ def main():
 
     print("Day 10 a =", numbers[0]*numbers[1])  # total group score
 
+    # ---------------- Part 2 (Knot Hash) ----------------
+    # Convert to ASCII codes + suffix
+    raw = lines[0].strip()
 
-    lines[0] = "1,2,3"
+    ascii_lengths = [ord(c) for c in raw] + [17, 31, 73, 47, 23]
 
-    ascii_lengths = []
-    for a in lines[0]:
-        ascii_lengths.append(ord(a))
-
-    ascii_lengths.append(17)
-    ascii_lengths.append(31)
-    ascii_lengths.append(73)
-    ascii_lengths.append(47)
-    ascii_lengths.append(23)
-
+    numbers = list(range(256))
     current_position = 0
     skip_size = 0
 
-    print(ascii_lengths)
-
-    for i in range(0, 64):  #iterate 64 rounds
-        while skip_size < len(ascii_lengths):
-            cur_length = ascii_lengths[skip_size]
-            old_nums = numbers.copy()
-            numbers = reverse_circular(numbers, current_position, cur_length)
-            current_position = (current_position + cur_length + skip_size) % len(numbers)  # <-- fix
+    for _ in range(64):
+        for length in ascii_lengths:  # <-- iterate lengths EACH round
+            reverse_circular(numbers, current_position, length)
+            current_position = (current_position + length + skip_size) % len(numbers)
             skip_size += 1
 
+    # Dense hash: XOR blocks of 16
+    dense = []
+    for block in range(16):
+        x = 0
+        base = block * 16
+        for j in range(16):
+            x ^= numbers[base + j]
+        dense.append(x)
 
+    # Hex digest (two lowercase hex digits per byte)
+    hex_str = ''.join(f'{b:02x}' for b in dense)
+    print("Day 10 b = ", hex_str)
 
-
-    print(ascii_lengths)
 
 if __name__ == "__main__":
     main()
