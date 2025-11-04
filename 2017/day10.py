@@ -46,7 +46,7 @@ def main():
     raw = lines[0].strip()
 
     ascii_lengths = [ord(c) for c in raw] + [17, 31, 73, 47, 23]
-
+    # comment
     numbers = list(range(256))
     current_position = 0
     skip_size = 0
