@@ -29,10 +29,11 @@ class IndexedCircularBuffer:
         return self.count
 
     def __str__(self):
-        return "[" + ", ".join(
+        #return "[" + ", ".join(
+        return "" + "".join(
             str(self.buffer[(self.head + i) % self.max_size])
             for i in range(self.count)
-        ) + "]"
+        ) + ""
 
     def __contains__(self, item):
         return item in self.char_to_index
@@ -133,19 +134,43 @@ class IndexedCircularBuffer:
 
 
 def main():
-   # lines = read_lines(Path(__file__).resolve().parent / 'input/day13.txt')
+    lines = read_lines(Path(__file__).resolve().parent / 'input/day16.txt')
+    items = list(lines[0].split(","))
 
-    buf = IndexedCircularBuffer(max_size=5)
+    
 
-    for c in "abcde": #"abcdefghijklmnop":
+
+    buf = IndexedCircularBuffer(max_size=16)
+
+    for c in "abcdefghijklmnop":
         buf.enqueue(c)
 
-    buf.Spin(1)
-    buf.Exchange(3,4)
-    buf.SwapPartner('e','b')
 
-    print(buf)
-    print("Day 15 a = ", 0)
+    for i, cmd in enumerate(items):
+        new_string = cmd[1:]
+        if cmd[0] == 's':
+        #    print("Spin")
+            buf.Spin(int(new_string))
+        elif cmd[0] == 'x':
+        #    print("Exchange")
+            new_cmd = new_string.split('/')
+            buf.Exchange(int(new_cmd[0]),int(new_cmd[1]))
+
+        elif cmd[0] == 'p':
+        #    print("Partner")
+            new_cmd = new_string.split('/')
+            buf.SwapPartner(new_cmd[0],new_cmd[1])
+        else:
+            print("Eror")
+            break
+
+
+#    buf.Spin(1)
+#    buf.Exchange(3,4)
+#    buf.SwapPartner('e','b')
+
+    #print(buf)
+    print("Day 15 a = ", buf)
 
     print("Day 15 b = ", 0)
 
