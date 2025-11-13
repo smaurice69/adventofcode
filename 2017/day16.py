@@ -2,9 +2,13 @@
 import copy
 import numbers
 from pathlib import Path
+import string
 import sys
 import re
 from collections import deque
+import numpy as np
+from numba import njit
+
 
 
 
@@ -13,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from utils.file_parsers import read_lines
+
 
 class IndexedCircularBuffer:
     """A circular buffer with 16 unique single-character elements."""
@@ -28,12 +33,21 @@ class IndexedCircularBuffer:
     def __len__(self):
         return self.count
 
+    #def __str__(self):
+        ##return "[" + ", ".join(
+        #return "" + "".join(
+            #str(self.buffer[(self.head + i) % self.max_size])
+            #for i in range(self.count)
+        #) + ""
+    
+    def state(self) -> str:
+        # logical order from head
+        return "".join(self.buffer[(self.head + i) % self.max_size] for i in range(self.count))
+
     def __str__(self):
-        #return "[" + ", ".join(
-        return "" + "".join(
-            str(self.buffer[(self.head + i) % self.max_size])
-            for i in range(self.count)
-        ) + ""
+        return self.state()
+
+
 
     def __contains__(self, item):
         return item in self.char_to_index
@@ -133,9 +147,57 @@ class IndexedCircularBuffer:
         self.tail = (self.head + self.count) % self.max_size
 
 
+def process_code(buf: IndexedCircularBuffer, items: list[str]) -> IndexedCircularBuffer:
+    for cmd in items:
+        new_string = cmd[1:]
+        if cmd[0] == 's':
+            buf.Spin(int(new_string))
+        elif cmd[0] == 'x':
+            a, b = new_string.split('/')
+            buf.Exchange(int(a), int(b))
+        elif cmd[0] == 'p':
+            a, b = new_string.split('/')
+            buf.SwapPartner(a, b)
+        else:
+            raise ValueError(f"Unknown command: {cmd}")
+    return buf
+
+def detect_cycle_and_compute(buf: IndexedCircularBuffer, items: list[str], total_iters: int) -> str:
+    seen = {}  # state -> iteration index
+    order = [] # list of states in order
+
+    # initial state
+    s = buf.state()
+    seen[s] = 0
+    order.append(s)
+
+    # advance until we see a repeat
+    while True:
+        process_code(buf, items)
+        s = buf.state()
+        if s in seen:
+            start = seen[s]          # where the cycle starts in 'order'
+            cycle_len = len(order) - start
+            break
+        seen[s] = len(order)
+        order.append(s)
+
+    # total_iters applications from the very beginning:
+    if total_iters < len(order):
+        return order[total_iters]
+
+    # Skip the pre-period (start), then mod by cycle length
+    if total_iters < start:
+        return order[total_iters]
+    else:
+        offset_in_cycle = (total_iters - start) % cycle_len
+        return order[start + offset_in_cycle]
+
+
 def main():
     lines = read_lines(Path(__file__).resolve().parent / 'input/day16.txt')
     items = list(lines[0].split(","))
+
 
     
 
@@ -145,35 +207,23 @@ def main():
     for c in "abcdefghijklmnop":
         buf.enqueue(c)
 
+    iter1 = process_code(buf,items)
+   
+    print("day 16 a = ", iter1)
 
-    for i, cmd in enumerate(items):
-        new_string = cmd[1:]
-        if cmd[0] == 's':
-        #    print("Spin")
-            buf.Spin(int(new_string))
-        elif cmd[0] == 'x':
-        #    print("Exchange")
-            new_cmd = new_string.split('/')
-            buf.Exchange(int(new_cmd[0]),int(new_cmd[1]))
+    iter1orig = copy.copy(iter1)
 
-        elif cmd[0] == 'p':
-        #    print("Partner")
-            new_cmd = new_string.split('/')
-            buf.SwapPartner(new_cmd[0],new_cmd[1])
-        else:
-            print("Eror")
-            break
+   
 
+    buf = IndexedCircularBuffer(max_size=16)
+    for c in "abcdefghijklmnop":
+        buf.enqueue(c)
 
-#    buf.Spin(1)
-#    buf.Exchange(3,4)
-#    buf.SwapPartner('e','b')
+    target = 1_000_000_000
+    result = detect_cycle_and_compute(buf, items, target)
+    print("Day 16 b =", result)
 
-    #print(buf)
-    print("Day 15 a = ", buf)
-
-    print("Day 15 b = ", 0)
-
+    
     
 
 
