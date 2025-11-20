@@ -9,41 +9,32 @@ if str(ROOT) not in sys.path:
 from utils.file_parsers import read_lines
 
 
+
 def main():
     """Run the Day 1 solution."""
-    lines = read_lines(Path(__file__).resolve().parent / 'input/day1test.txt')
+    lines = read_lines(Path(__file__).resolve().parent / 'input/day1.txt')
 
-    freq = 0
-    for a in lines:
-        freq += int(a)
+    # Convert once
+    nums = [int(x) for x in lines]
 
+    # Part 1
+    freq = sum(nums)
+    print("Day 1 a =", freq)
+
+    # Part 2
+    seen = {0}
+    curfreq = 0
     index = 0
-    freqs = [0]
-
+    totidx = 0
     while True:
-        a = int(lines[index])
-        curfreq = freqs[index]
-        newfreq = curfreq + a
-        print("Newfreq = ", newfreq)
-        if newfreq in freqs:
-            print("duplicate ")
+        curfreq += nums[index]
+        if curfreq in seen:
+            print("Day 1 b =", curfreq)
             break
-        else:
-            freqs.append(newfreq)
+        seen.add(curfreq)
         index += 1
-        if index == len(lines):
+        if index == len(nums):
             index = 0
-            print("Restart list")
-
-
-
-
-
-    print ("Day 1 a = ", freq)
-
-    print ("Day 1 b = ", newfreq)
     
-
-
 if __name__ == "__main__":
     main()
