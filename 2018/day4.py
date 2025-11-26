@@ -3,12 +3,15 @@ from itertools import count
 from pathlib import Path
 import sys
 from collections import defaultdict
-from utils.file_parsers import read_lines
+
 from datetime import datetime, date, time
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+
+from utils.file_parsers import read_lines
 
 class SleepInterval:
     def __init__(self, day: date, start: time, stop: time):
@@ -24,7 +27,6 @@ class SleepInterval:
 
     def __repr__(self):
         return f"SleepInterval(day={self.day}, start={self.start}, stop={self.stop})"
-
 
 class WorkerSleep:
     def __init__(self, worker_id: int):
@@ -50,40 +52,73 @@ def parse_date(date_str: str) -> datetime:
     # Parse with datetime
     return datetime.strptime(cleaned, "%Y-%m-%d %H:%M")
 
-
 def get_worker(workers, worker_id):
     if worker_id not in workers:
         workers[worker_id] = WorkerSleep(worker_id)
     return workers[worker_id]
 
-
 def main():
-    lines = read_lines(Path(__file__).resolve().parent / 'input/day4test.txt')
+    lines = read_lines(Path(__file__).resolve().parent / 'input/day4.txt')
     lines.sort()
-
     workers = {}
-
     for line in lines:
         sp = line.split(" ")
         thedate = parse_date(sp[0]+" "+sp[1])
 
         if sp[2]== "Guard":
-            print(f"Guard {int(sp[3][1:])}")
+        #    print(f"Guard {int(sp[3][1:])}")
             theworker = get_worker(workers, int(sp[3][1:]))
         elif sp[2]== "falls":
-            print(f"falling asleep")
+        #    print(f"falling asleep")
             starttime = thedate
         elif sp[2]== "wakes":
-            print(f"wakeing asleep")
+        #    print(f"wakeing asleep")
             stoptime = thedate
             theworker.add_sleep(starttime.date(), starttime.time(), stoptime.time())
         else:
             print("error")
             exit(1)
 
-    print("Day 4 a =", 0)
+    maxtotsleep = 0
+    sleepiestworker = None
+    for worker in workers.values():
+        tmpmax = worker.total_sleep_minutes()
+        if tmpmax > maxtotsleep:
+            maxtotsleep = tmpmax
+            sleepiestworker = worker.worker_id
 
-    print("Day 4 b =", 0)
+    # we have the sleepiest worker
+
+    sleepmins = [0]*60
+    for i in range(60):
+        for interval in workers[sleepiestworker].intervals:
+            if interval.start.minute <= i < interval.stop.minute:
+                sleepmins[i] += 1
+
+    idx = sleepmins.index(max(sleepmins))
+    
+    print("Day 4 a =", idx*sleepiestworker)
+
+    mworker_id = -1
+    mminute = -1
+    max_val = 0
+
+    for worker in workers.values():
+        sleepmins = [0]*60
+        for i in range(60):
+            for interval in worker.intervals:
+                if interval.start.minute <= i < interval.stop.minute:
+                    sleepmins[i] += 1
+        idx = sleepmins.index(max(sleepmins))
+        if sleepmins[idx] > max_val:
+            mworker_id = worker.worker_id
+            mminute = idx
+            max_val = sleepmins[idx]
+      #  print("worker = ", worker.worker_id, ", most worked minute = ", idx, " minutes = ", sleepmins[idx])
+
+
+
+    print("Day 4 b =", mworker_id*mminute)
     
 if __name__ == "__main__":
     main()
