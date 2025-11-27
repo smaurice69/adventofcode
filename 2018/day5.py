@@ -76,9 +76,11 @@ def main():
    # print(max_letter)
     minlen = len(newstr)
 
+    original = lines[0]
+
     for i in range(ord('a'), ord(max_letter) + 1):
-        newstr = lines[0]
-        newstr = remove_letter(newstr, chr(i))
+      #  newstr = lines[0]
+        newstr = remove_letter(original, chr(i))
      #   print(newstr)
         newstr = reduce_string(newstr)
         if len(newstr) < minlen:
