@@ -6,6 +6,8 @@ from collections import defaultdict
 
 from datetime import datetime, date, time
 
+from future.types import newstr
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -25,34 +27,63 @@ def remove2chars(s: str, index: int) -> str:
         raise IndexError("Index out of range for removing two characters")
     return s[:index] + s[index+2:]
 
+def reduce_string(s: str) -> str:
+    """Apply pair-removal rules repeatedly until stable."""
+    newstr = s
+    strlen = len(newstr)
+    index = 0
+    changed = True
+
+    while changed:
+        changed = False
+        index = 0
+
+        while index < strlen - 1:
+            if processpair(newstr[index], newstr[index + 1]):
+                newstr = remove2chars(newstr, index)
+                strlen -= 2
+                changed = True
+
+                # move back one step to catch new reactions
+                if index > 0:
+                    index -= 1
+            else:
+                index += 1
+
+    return newstr
+
+def remove_letter(s: str, ch: str) -> str:
+    if len(ch) != 1 or not ch.islower():
+        raise ValueError("Second argument must be a single lowercase letter")
+
+    lower = ch
+    upper = ch.upper()
+
+    return ''.join(c for c in s if c != lower and c != upper)
+
+
+
 def main():
     lines = read_lines(Path(__file__).resolve().parent / 'input/day5.txt')
     newstr = lines[0]
 
-    index = 0
-    strlen = len(newstr)
-    changed = True
+    newstr = reduce_string(newstr)
 
-    while changed == True:
-        changed = False
-        index = 0
-        while index < strlen-1:
-            res = processpair(newstr[index], newstr[index+1])
-            if res:
-                newstr = remove2chars(newstr, index)
-                strlen = len(newstr)
-            #    print(newstr)
-                changed = True
-            else:
-                index += 1
-
-
-
-      #  print(f"char1 = {lines[0][i]}, char2 = {lines[0][i+1]}, : {res}")
-   # print(newstr)
     print("Day 5 a =", len(newstr))
 
-    print("Day 5 b =", 0)
+    newstr = lines[0]
+    max_letter = max(c.lower() for c in newstr if c.isalpha())
+   # print(max_letter)
+    minlen = len(newstr)
+
+    for i in range(ord('a'), ord(max_letter) + 1):
+        newstr = lines[0]
+        newstr = remove_letter(newstr, chr(i))
+     #   print(newstr)
+        newstr = reduce_string(newstr)
+        if len(newstr) < minlen:
+            minlen = len(newstr)
+    print("Day 5 b =", minlen)
     
 if __name__ == "__main__":
     main()
