@@ -6,11 +6,13 @@ from collections import defaultdict
 
 from datetime import datetime, date, time
 
-from future.types import newstr
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+
+#from future.types import newstr
 
 
 from utils.file_parsers import read_lines
