@@ -18,7 +18,7 @@ from utils.file_parsers import read_lines
 
 
 def main():
-    lines = read_lines(Path(__file__).resolve().parent / 'input/day7.txt')
+    lines = read_lines(Path(__file__).resolve().parent / 'input/day7test.txt')
     
     transitions = defaultdict(list)   # step -> list of next steps
     prereq = defaultdict(set)         # step -> set of prerequisite steps
